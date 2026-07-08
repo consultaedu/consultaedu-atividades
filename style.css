@@ -1,3 +1,161 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f3f6f5;
+  color: #10231d;
+}
+
+.app {
+  width: min(1180px, 92%);
+  margin: 0 auto;
+  padding: 32px 0;
+}
+
+.hero {
+  background: linear-gradient(135deg, #006b3f, #10a36a);
+  color: white;
+  border-radius: 26px;
+  padding: 34px;
+  margin-bottom: 22px;
+}
+
+.badge {
+  background: rgba(255,255,255,.18);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: bold;
+}
+
+.hero h1 {
+  font-size: 42px;
+  margin: 18px 0 8px;
+}
+
+.hero p {
+  margin: 0;
+  opacity: .9;
+}
+
+.avisos, .status {
+  margin: 16px 0;
+}
+
+.aviso {
+  background: #fff8dc;
+  border-left: 5px solid #d6a700;
+  padding: 16px;
+  border-radius: 14px;
+  margin-bottom: 10px;
+}
+
+.painel {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  background: white;
+  padding: 18px;
+  border-radius: 22px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.06);
+}
+
+.campo label {
+  display: block;
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 7px;
+}
+
+select, input {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #d8e1de;
+  border-radius: 14px;
+  font-size: 15px;
+}
+
+.busca {
+  margin: 16px 0;
+}
+
+.resultado {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.card {
+  background: white;
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: 0 10px 28px rgba(0,0,0,.06);
+}
+
+.card h3 {
+  margin: 0 0 6px;
+}
+
+.meta {
+  font-size: 14px;
+  color: #5b6d66;
+  margin-bottom: 14px;
+}
+
+.status-tag {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.status-completo {
+  background: #dff7ea;
+  color: #086b3f;
+}
+
+.status-alerta {
+  background: #fff1cc;
+  color: #8a5a00;
+}
+
+.acoes {
+  display: grid;
+  gap: 9px;
+}
+
+.acoes a {
+  text-decoration: none;
+  text-align: center;
+  padding: 11px;
+  border-radius: 13px;
+  font-weight: bold;
+}
+
+.btn-principal {
+  background: #007a4d;
+  color: white;
+}
+
+.btn-secundario {
+  background: #eef4f2;
+  color: #12352b;
+}
+
+@media (max-width: 900px) {
+  .painel, .resultado {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h1 {
+    font-size: 32px;
+  }
+}
+
 .avisos {
   margin: 0 auto 18px;
   display: grid;
