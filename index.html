@@ -1,1 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Central do Gestor | ConsultaEdu</title>
 
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <div>
+        <span class="badge">ConsultaEdu</span>
+        <h1>Central do Gestor</h1>
+        <p>Acesse atividades presenciais e listas de presença de forma rápida.</p>
+      </div>
+    </header>
+
+    <section id="avisos" class="avisos"></section>
+
+    <section class="painel">
+      <div class="campo">
+        <label>Instituição</label>
+        <select id="instituicao">
+          <option value="">Selecione</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Turma</label>
+        <select id="turma" disabled>
+          <option value="">Selecione</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Período</label>
+        <select id="periodo" disabled>
+          <option value="">Selecione</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Curso</label>
+        <select id="curso" disabled>
+          <option value="">Selecione</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Disciplina</label>
+        <select id="disciplina" disabled>
+          <option value="">Selecione</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="busca">
+      <input id="pesquisa" type="text" placeholder="Buscar por aula, data ou disciplina..." />
+    </section>
+
+    <section id="status" class="status">Carregando dados...</section>
+
+    <section id="resultado" class="resultado"></section>
+  </main>
+
+  <script src="app.js?v=1"></script>
+</body>
+</html>
