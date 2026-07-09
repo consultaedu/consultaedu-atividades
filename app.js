@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbw6UwUL73Qphr6lADT_EJHJQ1-TXadU6edhda3_wZiwMxBqsaBS-BcO-OR2EpfM_2Zb/exec";
+const API_URL = "https://consultaedu-gestores-api.marcosdalleprane2.workers.dev/";
 
 let dados = [];
 
@@ -176,7 +176,7 @@ function criarCard(item) {
     <span class="status-tag ${statusClasse}">${item.status || "Verificar"}</span>
     <h3>${item.aula || "Aula"}</h3>
     <div class="meta">
-      <strong>${item.data || "Data não informada"}</strong><br>
+      <strong>${formatarDataExibicao(item.data) || "Data não informada"}</strong><br>
       ${item.disciplina || ""}<br>
       ${item.curso || ""}
     </div>
@@ -215,4 +215,21 @@ function ordenarPorAula(a, b) {
   const numB = parseInt(String(b.aula || "").replace(/\D/g, ""), 10) || 0;
 
   return numA - numB;
+}
+
+function formatarDataExibicao(valor) {
+  if (!valor) return "";
+
+  const texto = String(valor);
+
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(texto)) {
+    return texto;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}/.test(texto)) {
+    const [ano, mes, dia] = texto.slice(0, 10).split("-");
+    return `${dia}/${mes}/${ano}`;
+  }
+
+  return texto;
 }
