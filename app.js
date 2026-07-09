@@ -24,7 +24,10 @@ async function carregarDados() {
       return;
     }
 
-    dados = json.dados || [];
+    dados = prepararDados(json.dados || []).map(item => ({
+      ...item,
+      data: formatarDataExibicao(item.data)
+    }));
 
     montarAvisos(json.avisos || []);
     preencherSelect(instituicao, valoresUnicos(dados, "instituicao"));
@@ -176,7 +179,7 @@ function criarCard(item) {
     <span class="status-tag ${statusClasse}">${item.status || "Verificar"}</span>
     <h3>${item.aula || "Aula"}</h3>
     <div class="meta">
-      <strong>${formatarDataExibicao(item.data) || "Data não informada"}</strong><br>
+      <strong>${item.data || "Data não informada"}</strong>
       ${item.disciplina || ""}<br>
       ${item.curso || ""}
     </div>
@@ -232,4 +235,11 @@ function formatarDataExibicao(valor) {
   }
 
   return texto;
+}
+
+function prepararDados(lista) {
+  return lista.map(item => ({
+    ...item,
+    data: formatarDataExibicao(item.data)
+  }));
 }
