@@ -1,4 +1,4 @@
-const API_URL = "https://consultaedu-gestores-api.marcosdalleprane2.workers.dev";
+const API_URL = "https://script.google.com/macros/s/AKfycbw6UwUL73Qphr6lADT_EJHJQ1-TXadU6edhda3_wZiwMxBqsaBS-BcO-OR2EpfM_2Zb/exec";
 
 let dados = [];
 
