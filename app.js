@@ -193,14 +193,33 @@ function preencherCursos(lista) {
 }
 
 function atualizarDisciplinas() {
-  const lista = obterDadosDoContextoAtual();
+  // Limpa primeiro a disciplina escolhida no curso anterior
+  resetSelect(disciplina);
+  limparResultado();
+
+  let lista = filtrarDados({
+    instituicao: instituicao.value,
+    turma: turma.value,
+    periodo: periodo.value,
+    curso: curso.value
+  });
+
+  // Se o filtro de ingresso estiver visível,
+  // considera somente o mês selecionado.
+  if (!campoIngresso.hidden) {
+    lista = lista.filter(item => {
+      return normalizarValor(item.ingresso) ===
+             normalizarValor(ingresso.value);
+    });
+  } else {
+    // Nas estruturas antigas, usa somente registros sem ingresso
+    lista = lista.filter(item => !item.ingresso);
+  }
 
   preencherSelect(
     disciplina,
     valoresUnicos(lista, "disciplina")
   );
-
-  limparResultado();
 }
 
 function obterDadosDoContextoAtual() {
