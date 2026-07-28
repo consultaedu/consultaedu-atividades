@@ -281,9 +281,11 @@ h1, h2, h3, p {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 14px;
   #campoDisciplina {
-    grid-column: 1 / -1;
-    max-width: 500px;
-    margin: 0 auto;
+    grid-column: span 2;
+  }
+
+  #campoIngresso[hidden] + #campoCurso + #campoDisciplina {
+    grid-column: span 2;
   }
 }
 
