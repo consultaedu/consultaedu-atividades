@@ -4,22 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>ConsultaEDU | Central do Gestor</title>
+  <title>Central do Gestor | ConsultaEdu</title>
   <link rel="icon" type="image/png" href="../favicon.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
-    <script>
-const MANUTENCAO = false;
-
-if (MANUTENCAO) {
-  window.location.replace("manutencao.html");
-}
-</script>
-
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=2" />
 </head>
 <body>
 
@@ -32,18 +24,18 @@ if (MANUTENCAO) {
 <header class="hero">
   <nav class="topbar">
     <div class="brand">
-      <img src="grupo-faveni.png" alt="Grupo Educacional FAVENI" class="brand-logo">
+      <img src="../grupo-faveni.png" alt="Grupo Educacional FAVENI" class="brand-logo">
 
       <div class="brand-divider"></div>
 
       <div class="brand-text">
-        <strong>ConsultaEDU</strong>
+        <strong>ConsultaEdu</strong>
         <span>Central do Gestor</span>
       </div>
     </div>
 
-    <a class="topbar-link" href="https://drive.google.com/drive/folders/17gSb-hrzUjOFgUh5Elm1ynC3Q3QbxxSM?usp=drive_link">
-      Acessar o Drive Completo
+    <a class="topbar-link" href="https://consultaedu.com.br/">
+      Voltar ao Portal
     </a>
   </nav>
 
@@ -96,35 +88,42 @@ if (MANUTENCAO) {
 
   <section class="painel-filtros">
     <div class="campo">
-      <label>Instituição</label>
+      <label for="instituicao">Instituição</label>
       <select id="instituicao">
         <option value="">Selecione</option>
       </select>
     </div>
 
     <div class="campo">
-      <label>Turma</label>
+      <label for="turma">Turma</label>
       <select id="turma" disabled>
         <option value="">Selecione</option>
       </select>
     </div>
 
     <div class="campo">
-      <label>Período</label>
+      <label for="periodo">Período</label>
       <select id="periodo" disabled>
         <option value="">Selecione</option>
       </select>
     </div>
 
+    <div class="campo" id="campoIngresso" hidden>
+      <label for="ingresso">Mês de ingresso</label>
+      <select id="ingresso" disabled>
+        <option value="">Selecione</option>
+      </select>
+    </div>
+
     <div class="campo">
-      <label>Curso</label>
+      <label for="curso">Curso</label>
       <select id="curso" disabled>
         <option value="">Selecione</option>
       </select>
     </div>
 
     <div class="campo">
-      <label>Disciplina</label>
+      <label for="disciplina">Disciplina</label>
       <select id="disciplina" disabled>
         <option value="">Selecione</option>
       </select>
@@ -132,7 +131,11 @@ if (MANUTENCAO) {
   </section>
 
   <section class="busca">
-    <input id="pesquisa" type="text" placeholder="Buscar por aula, data, curso ou disciplina..." />
+    <input
+      id="pesquisa"
+      type="text"
+      placeholder="Buscar por aula, data, curso ou disciplina..."
+    />
   </section>
 
   <section id="status" class="status">Carregando dados...</section>
@@ -142,10 +145,10 @@ if (MANUTENCAO) {
 </main>
 
 <footer class="footer">
-  <span>ConsultaEDU | Central do Gestor</span>
-  <span>Versão 1.0 - By Marcos Daleprane</span>
+  <span>ConsultaEdu | Central do Gestor</span>
+  <span>Versão 2.0 - By Marcos Daleprane</span>
 </footer>
 
-<script src="app.js?v=6"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>
