@@ -5,6 +5,7 @@ let dados = [];
 const instituicao = document.getElementById("instituicao");
 const turma = document.getElementById("turma");
 const periodo = document.getElementById("periodo");
+const painelFiltros = document.getElementById("painelFiltros");
 const campoIngresso = document.getElementById("campoIngresso");
 const ingresso = document.getElementById("ingresso");
 const curso = document.getElementById("curso");
@@ -143,6 +144,7 @@ function configurarIngressoECursos() {
   }
 
   campoIngresso.hidden = false;
+  painelFiltros.classList.remove("sem-ingresso");
   ingresso.innerHTML = "";
 
   const opcaoVazia = document.createElement("option");
@@ -325,6 +327,8 @@ function ocultarIngresso() {
   campoIngresso.hidden = true;
   ingresso.innerHTML = `<option value="">Selecione</option>`;
   ingresso.disabled = true;
+
+  painelFiltros.classList.add("sem-ingresso");
 }
 
 function resetSelect(select) {
