@@ -309,7 +309,7 @@ function criarCard(item) {
       ${item.status || "Verificar"}
     </span>
 
-    <h3>${item.aula || "Aula"}</h3>
+    <h3>${item.Atividade || "Atividade"}</h3>
 
     <div class="meta">
       <strong>${item.data || "Data não informada"}</strong><br>
