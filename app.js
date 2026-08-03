@@ -269,7 +269,7 @@ function renderizarResultado() {
         item.ingresso,
         item.curso,
         item.disciplina,
-        item.aula,
+        item.Atividade,
         item.data,
         item.status
       ].join(" "));
