@@ -1,6 +1,9 @@
 const API_URL = "https://consultaedu-gestores-api.marcosdalleprane2.workers.dev/";
+const INTERVALO_ATUALIZACAO_MS = 5 * 60 * 1000;
 
 let dados = [];
+let carregamentoEmAndamento = false;
+let versaoAtualDaBase = "";
 
 const instituicao = document.getElementById("instituicao");
 const turma = document.getElementById("turma");
@@ -15,30 +18,177 @@ const statusBox = document.getElementById("status");
 const pesquisa = document.getElementById("pesquisa");
 const avisos = document.getElementById("avisos");
 
-carregarDados();
+carregarDados({ inicial: true });
 
-async function carregarDados() {
+// Enquanto a página estiver aberta, consulta novamente a API a cada 5 minutos.
+setInterval(() => {
+  carregarDados({ silencioso: true });
+}, INTERVALO_ATUALIZACAO_MS);
+
+// Ao voltar para uma aba que ficou em segundo plano, verifica os dados novamente.
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) {
+    carregarDados({ silencioso: true });
+  }
+});
+
+async function carregarDados({ inicial = false, silencioso = false } = {}) {
+  if (carregamentoEmAndamento) return;
+
+  carregamentoEmAndamento = true;
+  const selecoesAtuais = obterSelecoesAtuais();
+
   try {
-    const resposta = await fetch(API_URL);
+    // Cada requisição recebe uma URL única para não reutilizar cache
+    // do navegador, da Cloudflare ou de outro intermediário.
+    const url = new URL(API_URL);
+    url.searchParams.set("_consultaedu", String(Date.now()));
+
+    const resposta = await fetch(url.toString(), {
+      method: "GET",
+      cache: "no-store",
+      headers: {
+        Accept: "application/json"
+      }
+    });
+
+    if (!resposta.ok) {
+      throw new Error(`A API respondeu com o status ${resposta.status}.`);
+    }
+
     const json = await resposta.json();
 
     if (!json.sucesso) {
-      statusBox.textContent = json.mensagem || "Sistema indisponível.";
+      if (!silencioso || inicial) {
+        statusBox.textContent =
+          json.mensagem || "Sistema indisponível.";
+      }
       return;
     }
 
-    dados = prepararDados(json.dados || []);
+    const novosDados = prepararDados(json.dados || []);
+    const novaVersao =
+      `${String(json.atualizadoEm || "")}|${novosDados.length}`;
 
-    montarAvisos(json.avisos || []);
-    preencherSelect(instituicao, valoresUnicos(dados, "instituicao"));
+    const primeiraCarga = dados.length === 0;
+    const houveAtualizacao =
+      primeiraCarga || novaVersao !== versaoAtualDaBase;
 
-    statusBox.textContent =
-      `Base carregada com ${dados.length} registros. ` +
-      `Última atualização: ${json.atualizadoEm || "-"}`;
+    if (houveAtualizacao) {
+      dados = novosDados;
+      versaoAtualDaBase = novaVersao;
+
+      montarAvisos(json.avisos || []);
+      reconstruirFiltrosPreservandoSelecoes(selecoesAtuais);
+
+      if (disciplina.value || pesquisa.value.trim()) {
+        renderizarResultado();
+      } else {
+        statusBox.textContent =
+          `Base carregada com ${dados.length} registros. ` +
+          `Última atualização: ${json.atualizadoEm || "-"}`;
+      }
+    } else if (!silencioso || inicial) {
+      statusBox.textContent =
+        `Base carregada com ${dados.length} registros. ` +
+        `Última atualização: ${json.atualizadoEm || "-"}`;
+    }
   } catch (erro) {
     console.error(erro);
-    statusBox.textContent = "Erro ao carregar os dados.";
+
+    if (!silencioso || inicial) {
+      statusBox.textContent = "Erro ao carregar os dados.";
+    }
+  } finally {
+    carregamentoEmAndamento = false;
   }
+}
+
+function obterSelecoesAtuais() {
+  return {
+    instituicao: instituicao.value,
+    turma: turma.value,
+    periodo: periodo.value,
+    ingresso: ingresso.value,
+    curso: curso.value,
+    disciplina: disciplina.value
+  };
+}
+
+function restaurarValorSelect(select, valor) {
+  if (!valor) return false;
+
+  const existe = Array.from(select.options).some(
+    option => option.value === valor
+  );
+
+  if (existe) {
+    select.value = valor;
+    return true;
+  }
+
+  return false;
+}
+
+function reconstruirFiltrosPreservandoSelecoes(selecoes) {
+  preencherSelect(
+    instituicao,
+    valoresUnicos(dados, "instituicao")
+  );
+
+  if (!restaurarValorSelect(instituicao, selecoes.instituicao)) {
+    resetSelect(turma);
+    resetSelect(periodo);
+    ocultarIngresso();
+    resetSelect(curso);
+    resetSelect(disciplina);
+    return;
+  }
+
+  preencherSelect(
+    turma,
+    valoresUnicos(
+      filtrarDados({ instituicao: instituicao.value }),
+      "turma"
+    )
+  );
+
+  if (!restaurarValorSelect(turma, selecoes.turma)) {
+    resetSelect(periodo);
+    ocultarIngresso();
+    resetSelect(curso);
+    resetSelect(disciplina);
+    return;
+  }
+
+  preencherSelect(
+    periodo,
+    valoresUnicos(
+      filtrarDados({
+        instituicao: instituicao.value,
+        turma: turma.value
+      }),
+      "periodo"
+    )
+  );
+
+  if (!restaurarValorSelect(periodo, selecoes.periodo)) {
+    ocultarIngresso();
+    resetSelect(curso);
+    resetSelect(disciplina);
+    return;
+  }
+
+  configurarIngressoECursos();
+
+  if (!campoIngresso.hidden) {
+    restaurarValorSelect(ingresso, selecoes.ingresso);
+    atualizarCursos();
+  }
+
+  restaurarValorSelect(curso, selecoes.curso);
+  atualizarDisciplinas();
+  restaurarValorSelect(disciplina, selecoes.disciplina);
 }
 
 function montarAvisos(lista) {
