@@ -18,6 +18,15 @@ const statusBox = document.getElementById("status");
 const pesquisa = document.getElementById("pesquisa");
 const avisos = document.getElementById("avisos");
 
+const carregamentoBase = document.getElementById("carregamentoBase");
+const carregamentoTitulo = document.getElementById("carregamentoTitulo");
+const carregamentoMensagem = document.getElementById("carregamentoMensagem");
+const botaoTentarNovamente = document.getElementById("botaoTentarNovamente");
+
+botaoTentarNovamente.addEventListener("click", () => {
+  carregarDados({ inicial: true });
+});
+
 carregarDados({ inicial: true });
 
 // Enquanto a página estiver aberta, consulta novamente a API a cada 5 minutos.
@@ -37,6 +46,10 @@ async function carregarDados({ inicial = false, silencioso = false } = {}) {
 
   carregamentoEmAndamento = true;
   const selecoesAtuais = obterSelecoesAtuais();
+
+  if (inicial) {
+    mostrarCarregamentoInicial();
+  }
 
   try {
     // Cada requisição recebe uma URL única para não reutilizar cache
@@ -59,11 +72,7 @@ async function carregarDados({ inicial = false, silencioso = false } = {}) {
     const json = await resposta.json();
 
     if (!json.sucesso) {
-      if (!silencioso || inicial) {
-        statusBox.textContent =
-          json.mensagem || "Sistema indisponível.";
-      }
-      return;
+      throw new Error(json.mensagem || "Sistema indisponível.");
     }
 
     const novosDados = prepararDados(json.dados || []);
@@ -84,24 +93,77 @@ async function carregarDados({ inicial = false, silencioso = false } = {}) {
       if (disciplina.value || pesquisa.value.trim()) {
         renderizarResultado();
       } else {
-        statusBox.textContent =
-          `Base carregada com ${dados.length} registros. ` +
-          `Última atualização: ${json.atualizadoEm || "-"}`;
+        atualizarStatusBase(json.atualizadoEm);
       }
     } else if (!silencioso || inicial) {
-      statusBox.textContent =
-        `Base carregada com ${dados.length} registros. ` +
-        `Última atualização: ${json.atualizadoEm || "-"}`;
+      atualizarStatusBase(json.atualizadoEm);
+    }
+
+    if (inicial) {
+      finalizarCarregamentoInicial();
     }
   } catch (erro) {
     console.error(erro);
 
-    if (!silencioso || inicial) {
-      statusBox.textContent = "Erro ao carregar os dados.";
+    if (inicial) {
+      mostrarErroCarregamento(
+        erro?.message || "Não foi possível carregar a base de atividades."
+      );
+    } else if (!silencioso) {
+      statusBox.classList.remove("oculto");
+      statusBox.textContent = "Erro ao atualizar os dados.";
     }
   } finally {
     carregamentoEmAndamento = false;
   }
+}
+
+function mostrarCarregamentoInicial() {
+  carregamentoBase.classList.remove("oculto", "erro", "sucesso");
+  carregamentoTitulo.textContent = "Carregando a base de atividades...";
+  carregamentoMensagem.textContent =
+    "Na primeira abertura, isso pode levar alguns segundos.";
+  botaoTentarNovamente.hidden = true;
+
+  statusBox.classList.add("oculto");
+  instituicao.disabled = true;
+  turma.disabled = true;
+  periodo.disabled = true;
+  ingresso.disabled = true;
+  curso.disabled = true;
+  disciplina.disabled = true;
+  pesquisa.disabled = true;
+}
+
+function finalizarCarregamentoInicial() {
+  carregamentoBase.classList.add("sucesso");
+  carregamentoTitulo.textContent = "Base de atividades carregada!";
+  carregamentoMensagem.textContent =
+    "Agora você já pode localizar atividades, listas de presença e pastas.";
+
+  pesquisa.disabled = false;
+
+  setTimeout(() => {
+    carregamentoBase.classList.add("oculto");
+    statusBox.classList.remove("oculto");
+  }, 700);
+}
+
+function mostrarErroCarregamento(mensagem) {
+  carregamentoBase.classList.remove("oculto", "sucesso");
+  carregamentoBase.classList.add("erro");
+  carregamentoTitulo.textContent = "Não foi possível carregar as atividades.";
+  carregamentoMensagem.textContent =
+    mensagem || "Verifique sua conexão e tente novamente.";
+  botaoTentarNovamente.hidden = false;
+
+  statusBox.classList.add("oculto");
+}
+
+function atualizarStatusBase(atualizadoEm) {
+  statusBox.textContent =
+    `Base carregada com ${dados.length} registros. ` +
+    `Última atualização: ${atualizadoEm || "-"}`;
 }
 
 function obterSelecoesAtuais() {
@@ -407,6 +469,7 @@ function filtrarDados(filtros) {
 }
 
 function renderizarResultado() {
+  statusBox.classList.remove("oculto");
   const textoBusca = normalizar(pesquisa.value);
   let lista = obterDadosDoContextoAtual();
 
@@ -507,6 +570,7 @@ function resetSelect(select) {
 
 function limparResultado() {
   resultado.innerHTML = "";
+  statusBox.classList.remove("oculto");
   statusBox.textContent = "Selecione uma disciplina ou use a busca.";
 }
 

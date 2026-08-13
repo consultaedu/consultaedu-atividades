@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css?v=2" />
+  <link rel="stylesheet" href="style.css?v=3" />
 </head>
 <body>
 
@@ -89,7 +89,7 @@
   <section class="painel-filtros" id="painelFiltros">
     <div class="campo">
       <label for="instituicao">Instituição</label>
-      <select id="instituicao">
+      <select id="instituicao" disabled>
         <option value="">Selecione</option>
       </select>
     </div>
@@ -135,10 +135,24 @@
       id="pesquisa"
       type="text"
       placeholder="Buscar por aula, data, curso ou disciplina..."
+      disabled
     />
   </section>
 
-  <section id="status" class="status">Carregando dados...</section>
+  <section id="carregamentoBase" class="carregamento-base" aria-live="polite">
+    <div class="carregamento-spinner" aria-hidden="true"></div>
+
+    <div class="carregamento-texto">
+      <strong id="carregamentoTitulo">Carregando a base de atividades...</strong>
+      <span id="carregamentoMensagem">Na primeira abertura, isso pode levar alguns segundos.</span>
+    </div>
+
+    <button id="botaoTentarNovamente" class="botao-recarregar" type="button" hidden>
+      Tentar novamente
+    </button>
+  </section>
+
+  <section id="status" class="status oculto">Aguardando carregamento...</section>
 
   <section id="resultado" class="resultado"></section>
 
@@ -149,6 +163,6 @@
   <span>Versão 2.0 - By Marcos Daleprane</span>
 </footer>
 
-<script src="app.js?v=17"></script>
+<script src="app.js?v=18"></script>
 </body>
 </html>
