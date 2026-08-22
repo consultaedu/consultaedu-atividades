@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Devolução de Atividades | ConsultaEdu</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css?v=1" />
+</head>
+
+<body>
+
+<div class="page-bg">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<header class="hero">
+  <nav class="topbar">
+    <div class="brand">
+      <img src="../grupo-faveni.png" alt="Grupo Educacional FAVENI" class="brand-logo">
+
+      <div class="brand-divider"></div>
+
+      <div class="brand-text">
+        <strong>ConsultaEdu</strong>
+        <span>Devolução de Atividades</span>
+      </div>
+    </div>
+
+    <a class="topbar-link" href="../">
+      Voltar ao portal
+    </a>
+  </nav>
+
+  <section class="hero-content">
+    <div class="hero-copy">
+      <div class="eyebrow">Área dos gestores</div>
+
+      <h1>Devolva os arquivos em poucos cliques</h1>
+
+      <p>
+        Envie atividades e listas de presença digitalizadas de vários alunos
+        da mesma disciplina de uma só vez. O sistema organiza tudo
+        automaticamente por turma, curso, disciplina, semana e polo.
+      </p>
+    </div>
+
+    <div class="hero-panel">
+      <div class="mini-card">
+        <span>📍</span>
+        <div>
+          <strong>Identificação</strong>
+          <small>Informe seu polo e seu nome</small>
+        </div>
+      </div>
+
+      <div class="mini-card">
+        <span>📚</span>
+        <div>
+          <strong>Turma e disciplina</strong>
+          <small>Selecione os dados da base</small>
+        </div>
+      </div>
+
+      <div class="mini-card active">
+        <span>📤</span>
+        <div>
+          <strong>Envio em lote</strong>
+          <small>Vários PDFs em um único envio</small>
+        </div>
+      </div>
+    </div>
+  </section>
+</header>
+
+<main class="container">
+
+  <section class="section-title">
+    <span>Devolução</span>
+    <h2>Envie os arquivos da semana</h2>
+  </section>
+
+  <section id="loadingBase" class="carregamento-base" aria-live="polite">
+    <div class="carregamento-spinner" aria-hidden="true"></div>
+
+    <div class="carregamento-texto">
+      <strong>Carregando cursos e disciplinas...</strong>
+      <span>Na primeira abertura, isso pode levar alguns segundos.</span>
+    </div>
+  </section>
+
+  <section id="erroBase" class="aviso erro-base hidden"></section>
+
+  <form id="uploadForm" novalidate>
+
+    <section class="bloco-formulario">
+      <div class="bloco-cabecalho">
+        <div class="numero-etapa">1</div>
+
+        <div>
+          <span>Identificação</span>
+          <h3>Quem está fazendo a devolução?</h3>
+          <p>
+            O polo e o nome ficam salvos neste navegador para facilitar
+            os próximos envios.
+          </p>
+        </div>
+      </div>
+
+      <div class="grade-formulario grade-2">
+        <div class="campo">
+          <label for="polo">Polo</label>
+          <input
+            id="polo"
+            type="text"
+            maxlength="150"
+            autocomplete="organization"
+            placeholder="Ex.: Santa Maria de Jetibá"
+            required
+          />
+        </div>
+
+        <div class="campo">
+          <label for="gestor">Gestor / Mediador</label>
+          <input
+            id="gestor"
+            type="text"
+            maxlength="150"
+            autocomplete="name"
+            placeholder="Digite seu nome"
+            required
+          />
+        </div>
+      </div>
+    </section>
+
+
+    <section class="bloco-formulario">
+      <div class="bloco-cabecalho">
+        <div class="numero-etapa">2</div>
+
+        <div>
+          <span>Turma e semana</span>
+          <h3>Onde estes arquivos pertencem?</h3>
+          <p>
+            Faculdade, turma, curso e disciplina vêm da base para evitar
+            divergências na organização do Drive.
+          </p>
+        </div>
+      </div>
+
+      <div class="grade-formulario grade-dados">
+        <div class="campo">
+          <label for="faculdade">Faculdade</label>
+          <select id="faculdade" required disabled>
+            <option value="">Carregando...</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="periodoTurma">Período / Turma</label>
+          <select id="periodoTurma" required disabled>
+            <option value="">Selecione a faculdade primeiro</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="curso">Curso</label>
+          <select id="curso" required disabled>
+            <option value="">Selecione a turma primeiro</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="semana">Semana</label>
+          <select id="semana" required></select>
+        </div>
+
+        <div class="campo campo-disciplina-upload">
+          <label for="disciplina">Disciplina</label>
+          <select id="disciplina" required disabled>
+            <option value="">Selecione o curso primeiro</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="bloco-formulario">
+      <div class="bloco-cabecalho">
+        <div class="numero-etapa">3</div>
+
+        <div>
+          <span>Arquivos</span>
+          <h3>Selecione os PDFs desta disciplina</h3>
+          <p>
+            Você pode selecionar vários arquivos ao mesmo tempo.
+            Atividades e listas serão separadas automaticamente no Drive.
+          </p>
+        </div>
+      </div>
+
+      <div class="grade-uploads">
+        <label class="upload-box" for="atividades">
+          <input id="atividades" type="file" accept=".pdf,application/pdf" multiple />
+
+          <div class="upload-icone">📄</div>
+
+          <div class="upload-conteudo">
+            <strong>Atividades dos alunos</strong>
+            <span>Selecione um ou vários PDFs</span>
+            <small id="atividadesResumo">Nenhum arquivo selecionado</small>
+          </div>
+
+          <div class="upload-acao">Selecionar</div>
+        </label>
+
+
+        <label class="upload-box" for="listas">
+          <input id="listas" type="file" accept=".pdf,application/pdf" multiple />
+
+          <div class="upload-icone">📋</div>
+
+          <div class="upload-conteudo">
+            <strong>Listas de presença</strong>
+            <span>Selecione uma ou várias listas</span>
+            <small id="listasResumo">Nenhum arquivo selecionado</small>
+          </div>
+
+          <div class="upload-acao">Selecionar</div>
+        </label>
+      </div>
+
+
+      <div id="arquivosSelecionados" class="arquivos-selecionados hidden"></div>
+
+
+      <div class="barra-envio">
+        <div class="resumo-envio">
+          <strong id="totalSelecionado">0 arquivos selecionados</strong>
+          <span>Somente PDF • até 15 MB por arquivo</span>
+        </div>
+
+        <button id="btnEnviar" class="botao-enviar" type="submit" disabled>
+          Enviar arquivos
+        </button>
+      </div>
+    </section>
+
+  </form>
+
+
+  <section id="progressoCard" class="bloco-formulario progresso-card hidden" aria-live="polite">
+    <div class="progresso-topo">
+      <div>
+        <span class="etiqueta-progresso">Envio em andamento</span>
+        <h3 id="progressoTitulo">Enviando arquivos...</h3>
+        <p id="progressoTexto">Preparando envio.</p>
+      </div>
+
+      <strong id="progressoPercentual">0%</strong>
+    </div>
+
+    <div class="trilho-progresso">
+      <div id="progressoBarra" class="barra-progresso"></div>
+    </div>
+
+    <div id="resultadoLista" class="lista-resultados"></div>
+  </section>
+
+
+  <section id="sucessoCard" class="sucesso-card hidden">
+    <div class="sucesso-icone">✓</div>
+
+    <div class="sucesso-conteudo">
+      <span>Arquivos recebidos</span>
+      <h3>Envio concluído</h3>
+      <p id="sucessoTexto"></p>
+
+      <div class="sucesso-acoes">
+        <button id="btnOutraDisciplina" class="botao-enviar" type="button">
+          Enviar outra disciplina
+        </button>
+
+        <button id="btnNovoEnvio" class="botao-secundario-upload" type="button">
+          Novo envio
+        </button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+
+<footer class="footer">
+  <span>ConsultaEdu | Devolução de Atividades</span>
+  <span>By Marcos Daleprane</span>
+</footer>
+
+<script src="script.js?v=2"></script>
+</body>
+</html>
