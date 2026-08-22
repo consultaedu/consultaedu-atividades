@@ -342,11 +342,17 @@ async function iniciarEnvio(event) {
   salvarPreferencias();
 
   const loteId = gerarLote();
+
+  // O progresso agora considera o tamanho real dos arquivos do lote.
+  const totalBytes = fila.reduce((soma, item) => soma + item.file.size, 0) || 1;
+  let bytesConcluidos = 0;
+
   el("progressoCard").classList.remove("hidden");
   el("sucessoCard").classList.add("hidden");
   el("resultadoLista").innerHTML = "";
-  atualizarProgresso(0, fila.length, "Preparando envio");
-  el("progressoCard").scrollIntoView({ behavior: "smooth" });
+  el("progressoTitulo").textContent = `Enviando ${fila.length} arquivo(s)...`;
+  atualizarProgressoPercentual(0, "Preparando o primeiro arquivo...");
+  el("progressoCard").scrollIntoView({ behavior: "smooth", block: "start" });
 
   let enviados = 0;
   let falhas = 0;
@@ -354,36 +360,36 @@ async function iniciarEnvio(event) {
   for (let i = 0; i < fila.length; i++) {
     const item = fila[i];
 
-    atualizarProgresso(
-      i,
-      fila.length,
-      `Enviando ${i + 1} de ${fila.length}: ${item.file.name}`
-    );
-
     try {
+      atualizarProgressoPercentual(
+        (bytesConcluidos / totalBytes) * 100,
+        `Preparando arquivo ${i + 1} de ${fila.length}: ${item.file.name}`
+      );
+
       const base64 = await arquivoParaBase64(item.file);
 
-      const response = await fetch(`${API_URL}/upload`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          loteId,
-          ...meta,
-          tipo: item.tipo,
-          arquivo: {
-            nome: item.file.name,
-            mime: item.file.type || "application/pdf",
-            tamanho: item.file.size,
-            base64
-          }
-        })
-      });
+      const payload = {
+        loteId,
+        ...meta,
+        tipo: item.tipo,
+        arquivo: {
+          nome: item.file.name,
+          mime: item.file.type || "application/pdf",
+          tamanho: item.file.size,
+          base64
+        }
+      };
 
-      const data = await response.json();
-
-      if (!response.ok || !data.sucesso) {
-        throw new Error(data.mensagem || `Erro HTTP ${response.status}`);
-      }
+      const data = await enviarArquivoComProgresso(
+        payload,
+        item.file,
+        {
+          indice: i,
+          totalArquivos: fila.length,
+          totalBytes,
+          bytesConcluidos
+        }
+      );
 
       enviados++;
       adicionarResultado(true, item.file.name, data.protocolo || "Recebido");
@@ -391,13 +397,26 @@ async function iniciarEnvio(event) {
     } catch (error) {
       falhas++;
       adicionarResultado(false, item.file.name, error.message || String(error));
-    }
 
-    atualizarProgresso(i + 1, fila.length);
+    } finally {
+      // O arquivo já terminou a tentativa (com sucesso ou falha).
+      // A barra segue para o próximo sem ficar presa.
+      bytesConcluidos += item.file.size;
+
+      atualizarProgressoPercentual(
+        (bytesConcluidos / totalBytes) * 100,
+        i + 1 < fila.length
+          ? `Arquivo ${i + 1} de ${fila.length} concluído. Preparando o próximo...`
+          : "Finalizando o lote..."
+      );
+    }
   }
 
   enviando = false;
   validarFormulario();
+
+  // Garante visualmente os 100% ao finalizar o lote.
+  atualizarProgressoPercentual(100);
 
   const texto =
     `${enviados} de ${fila.length} arquivo(s) recebido(s)` +
@@ -415,7 +434,117 @@ async function iniciarEnvio(event) {
       : `${enviados} arquivo(s) foram recebidos e organizados no Drive.`;
 
   el("sucessoCard").classList.remove("hidden");
-  el("sucessoCard").scrollIntoView({ behavior: "smooth" });
+  el("sucessoCard").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+/**
+ * Faz o POST com XMLHttpRequest para termos acesso a xhr.upload.onprogress.
+ *
+ * 90% da "fatia" de cada arquivo representa o envio navegador -> Worker.
+ * Os 10% finais ficam reservados para Worker -> Apps Script -> Google Drive.
+ */
+function enviarArquivoComProgresso(payload, file, contexto) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("POST", `${API_URL}/upload`, true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.timeout = 180000;
+
+    const {
+      indice,
+      totalArquivos,
+      totalBytes,
+      bytesConcluidos
+    } = contexto;
+
+    let entrouNaEtapaDrive = false;
+
+    xhr.upload.onprogress = event => {
+      if (!event.lengthComputable || !event.total) return;
+
+      const proporcaoUpload = Math.min(1, event.loaded / event.total);
+
+      // Deixa 10% da parcela deste arquivo para o processamento no Drive.
+      const bytesVirtuaisDoArquivo =
+        file.size * proporcaoUpload * 0.90;
+
+      const percentualLote =
+        ((bytesConcluidos + bytesVirtuaisDoArquivo) / totalBytes) * 100;
+
+      atualizarProgressoPercentual(
+        percentualLote,
+        `Enviando arquivo ${indice + 1} de ${totalArquivos}: ${file.name}`
+      );
+
+      if (proporcaoUpload >= 0.999 && !entrouNaEtapaDrive) {
+        entrouNaEtapaDrive = true;
+
+        const percentualEsperaDrive =
+          ((bytesConcluidos + file.size * 0.90) / totalBytes) * 100;
+
+        atualizarProgressoPercentual(
+          percentualEsperaDrive,
+          `Upload concluído. Salvando arquivo ${indice + 1} de ${totalArquivos} no Google Drive...`
+        );
+      }
+    };
+
+    xhr.upload.onload = () => {
+      if (entrouNaEtapaDrive) return;
+      entrouNaEtapaDrive = true;
+
+      const percentualEsperaDrive =
+        ((bytesConcluidos + file.size * 0.90) / totalBytes) * 100;
+
+      atualizarProgressoPercentual(
+        percentualEsperaDrive,
+        `Upload concluído. Salvando arquivo ${indice + 1} de ${totalArquivos} no Google Drive...`
+      );
+    };
+
+    xhr.onload = () => {
+      let data = {};
+
+      try {
+        data = JSON.parse(xhr.responseText || "{}");
+      } catch (_) {
+        reject(new Error("O servidor retornou uma resposta inválida."));
+        return;
+      }
+
+      if (xhr.status < 200 || xhr.status >= 300 || !data.sucesso) {
+        reject(new Error(data.mensagem || `Erro HTTP ${xhr.status}`));
+        return;
+      }
+
+      // Confirma os 100% da parcela deste arquivo somente quando
+      // Worker + Apps Script + Drive responderem com sucesso.
+      const percentualArquivoConfirmado =
+        ((bytesConcluidos + file.size) / totalBytes) * 100;
+
+      atualizarProgressoPercentual(
+        percentualArquivoConfirmado,
+        `Arquivo ${indice + 1} de ${totalArquivos} recebido com sucesso.`
+      );
+
+      resolve(data);
+    };
+
+    xhr.onerror = () => {
+      reject(new Error("Falha de conexão durante o envio do arquivo."));
+    };
+
+    xhr.ontimeout = () => {
+      reject(new Error("O envio demorou mais do que o esperado. Tente novamente."));
+    };
+
+    xhr.onabort = () => {
+      reject(new Error("O envio foi interrompido."));
+    };
+
+    xhr.send(JSON.stringify(payload));
+  });
 }
 
 function montarMetadados() {
@@ -466,12 +595,16 @@ function arquivoParaBase64(file) {
   });
 }
 
-function atualizarProgresso(atual, total, texto) {
-  const percentual = total ? Math.round((atual / total) * 100) : 0;
-  el("progressoBarra").style.width = `${percentual}%`;
-  el("progressoPercentual").textContent = `${percentual}%`;
+function atualizarProgressoPercentual(percentual, texto) {
+  const valor = Math.max(0, Math.min(100, Number(percentual) || 0));
+  const exibido = Math.round(valor);
 
-  if (texto) el("progressoTexto").textContent = texto;
+  el("progressoBarra").style.width = `${valor.toFixed(2)}%`;
+  el("progressoPercentual").textContent = `${exibido}%`;
+
+  if (texto) {
+    el("progressoTexto").textContent = texto;
+  }
 }
 
 function adicionarResultado(ok, arquivo, detalhe) {
