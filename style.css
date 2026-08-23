@@ -164,6 +164,22 @@ body {
   box-shadow: 0 15px 30px rgba(11, 127, 79, 0.26);
 }
 
+
+/* ===== Botão temporariamente desativado ===== */
+.topbar-link[data-ativo="false"] {
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.52;
+  filter: grayscale(0.35);
+  box-shadow: none;
+  transform: none;
+}
+
+.topbar-link[data-ativo="false"]:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 .hero-content {
   padding: 58px 8px 28px;
   display: grid;
