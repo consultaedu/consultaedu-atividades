@@ -720,3 +720,11 @@ input:disabled {
     width: 100%;
   }
 }
+
+.topbar-link-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(0.35);
+  box-shadow: none;
+}
