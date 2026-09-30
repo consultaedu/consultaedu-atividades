@@ -3,7 +3,7 @@ const MAX_FILE_MB = 15;
 const STORAGE_KEY = "consultaedu_devolucoes_v2";
 
 let BASE = [];
-let enviando = false;
+let enviando = true;
 
 const el = id => document.getElementById(id);
 
